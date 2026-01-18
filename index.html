@@ -174,30 +174,14 @@
 <script>
 function analyser() {
     const texte = document.getElementById("inputText").value;
-    const checkIP = document.getElementById("checkIP").checked;
-    const checkMail = document.getElementById("checkMail").checked;
 
-    let resultats = [];
+    const regex = /\b(?:\d{1,3}\.){3}\d{1,3}\b|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
 
-    if (checkIP) {
-        const regexIP = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
-        const ips = texte.match(regexIP);
-        if (ips) resultats = resultats.concat(ips);
-    }
+    const matches = texte.match(regex) || [];
 
-    if (checkMail) {
-        const regexMail = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
-        const mails = texte.match(regexMail);
-        if (mails) resultats = resultats.concat(mails);
-    }
+    const uniquesTries = [...new Set(matches)].sort();
 
-    // sort + -u
-    const resultatsUniquesTries = [...new Set(resultats)].sort();
-
-    document.getElementById("resultats").value =
-        resultatsUniquesTries.length
-        ? resultatsUniquesTries.join("\n")
-        : "Aucun résultat trouvé.";
+    document.getElementById("resultats").value = uniquesTries.join("\n");
 }
 </script>
 
