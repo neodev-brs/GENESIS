@@ -84,21 +84,25 @@
       placeholder="Collez ici l’entête brute du courrier électronique…">
     </textarea>
 
-    <fieldset class="fr-fieldset fr-mt-2w">
-      <legend class="fr-fieldset__legend">
-        Types d’éléments à extraire
-      </legend>
+<fieldset class="fr-fieldset fr-mt-2w">
+  <legend class="fr-fieldset__legend">
+    Types d’éléments à extraire
+  </legend>
 
-      <div class="fr-checkbox-group fr-mb-2w">
-        <input type="checkbox" id="chk-ip">
-        <label for="chk-ip">Adresses IP</label>
-      </div>
+  <div class="fr-fieldset__content">
 
-      <div class="fr-checkbox-group">
-        <input type="checkbox" id="chk-mail">
-        <label for="chk-mail">Adresses e-mail</label>
-      </div>
-    </fieldset>
+    <div class="fr-checkbox-group fr-mb-2w">
+      <input type="checkbox" id="chk-ip">
+      <label for="chk-ip">Adresses IP</label>
+    </div>
+
+    <div class="fr-checkbox-group">
+      <input type="checkbox" id="chk-mail">
+      <label for="chk-mail">Adresses e-mail</label>
+    </div>
+
+  </div>
+</fieldset>
 
     <button id="btn-analyze" class="fr-btn fr-mt-2w">
       Analyser
