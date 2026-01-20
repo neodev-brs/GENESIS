@@ -225,15 +225,16 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Ouvre la modal DSFR
-  modal.setAttribute('data-fr-opened', 'true');
+  // OUVERTURE OFFICIELLE DSFR
+  dsfr(modal).modal.open();
 
   btnOk.addEventListener('click', () => {
     if (chkHide.checked) {
       localStorage.setItem(STORAGE_KEY, 'true');
     }
 
-    modal.removeAttribute('data-fr-opened');
+    // FERMETURE OFFICIELLE DSFR
+    dsfr(modal).modal.close();
   });
 });
 </script>
