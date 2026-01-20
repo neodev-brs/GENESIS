@@ -225,6 +225,7 @@ window.addEventListener('dsfr:start', () => {
   if (localStorage.getItem(STORAGE_KEY) === 'true') return;
 
   //  OUVERTURE DSFR OFFICIELLE
+  console.log('dsfr:start déclenché');
   modal.setAttribute('data-fr-opened', 'true');
 
   btnOk.addEventListener('click', () => {
