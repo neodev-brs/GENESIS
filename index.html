@@ -125,6 +125,45 @@
   </div>
 </main>
 
+<!-- MODAL TUTO ENTÊTE -->
+<div class="fr-modal" id="modal-tuto" aria-labelledby="modal-tuto-title" role="dialog">
+  <div class="fr-modal__body">
+    <div class="fr-modal__header">
+      <button class="fr-btn--close fr-btn" aria-controls="modal-tuto" title="Fermer">
+        Fermer
+      </button>
+    </div>
+
+    <div class="fr-modal__content">
+      <h1 id="modal-tuto-title" class="fr-modal__title">
+        Comment récupérer l’entête d’un courrier électronique
+      </h1>
+
+      <p>
+        Pour analyser un message, GENESIS a besoin de son <strong>entête complète</strong>.
+      </p>
+
+      <ol>
+        <li>Ouvrez le courrier électronique</li>
+        <li>Utilisez le raccourci <strong>Ctrl + U</strong></li>
+        <li>Copiez l’intégralité du contenu affiché</li>
+        <li>Collez-le dans le champ « Texte à analyser »</li>
+      </ol>
+
+      <div class="fr-checkbox-group fr-mt-3w">
+        <input type="checkbox" id="hide-tuto">
+        <label for="hide-tuto">Ne plus afficher ce message</label>
+      </div>
+    </div>
+
+    <div class="fr-modal__footer">
+      <button id="btn-tuto-ok" class="fr-btn">
+        Compris, commencer l’analyse
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- DSFR JS -->
 
 <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.1/dist/dsfr/dsfr.module.min.js" type="module"></script>
@@ -172,6 +211,28 @@
 
     output.innerHTML = blocks.join('<br><br>');
   });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const STORAGE_KEY = 'genesis_hide_tuto';
+
+  if (localStorage.getItem(STORAGE_KEY) === 'true') {
+    return;
+  }
+
+  dsfr('modal-tuto').modal.show();
+
+  document.getElementById('btn-tuto-ok').addEventListener('click', () => {
+    const hide = document.getElementById('hide-tuto').checked;
+
+    if (hide) {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    }
+
+    dsfr('modal-tuto').modal.hide();
+  });
+});
 </script>
 
 </body>
