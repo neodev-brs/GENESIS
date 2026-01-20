@@ -75,14 +75,8 @@
 <main class="genesis-main">
   <div class="fr-container">
 
-  <button id="btn-tuto" class="fr-btn fr-btn--secondary fr-mb-2w">
-  Tutoriel
-</button>
 
 <div class="genesis-grid">
-
-<div id="view-analyse">
-  <!--INTERFACE D'ANALYSE -->
 
   <!-- GAUCHE -->
   <section>
@@ -129,42 +123,6 @@
 
 
   </div>
-
-  <!-- VUE TUTORIEL -->
-
-</div>
-<div id="view-tuto" hidden>
-
-  <!-- En-tête avec flèche retour -->
-  <div class="fr-container fr-mt-2w">
-    <button id="btn-back" class="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-arrow-left-line">
-      Retour
-    </button>
-  </div>
-
-  <!-- Contenu tutoriel -->
-  <div class="fr-container fr-mt-4w">
-
-    <h1 class="fr-h3">
-      Comment récupérer l’entête d’un courrier électronique
-    </h1>
-
-    <p>
-      Pour analyser un message, GENESIS a besoin de son <strong>entête complète</strong>.
-    </p>
-
-    <ol class="fr-mt-2w">
-      <li>Ouvrez le courrier électronique</li>
-      <li>Utilisez le raccourci <strong>Ctrl + U</strong></li>
-      <li>Copiez l’intégralité du contenu affiché</li>
-      <li>Revenez sur GENESIS</li>
-      <li>Collez le contenu dans le champ « Texte à analyser »</li>
-    </ol>
-
-  </div>
-
-</div>
-
 </main>
 
 <!-- DSFR JS -->
@@ -213,26 +171,6 @@
     }
 
     output.innerHTML = blocks.join('<br><br>');
-  });
-</script>
-
-<script>
-  const viewAnalyse = document.getElementById('view-analyse');
-  const viewTuto = document.getElementById('view-tuto');
-
-  const btnTuto = document.getElementById('btn-tuto');
-  const btnBack = document.getElementById('btn-back');
-
-  btnTuto.addEventListener('click', () => {
-    viewAnalyse.hidden = true;
-    viewTuto.hidden = false;
-    window.scrollTo(0, 0);
-  });
-
-  btnBack.addEventListener('click', () => {
-    viewTuto.hidden = true;
-    viewAnalyse.hidden = false;
-    window.scrollTo(0, 0);
   });
 </script>
 
