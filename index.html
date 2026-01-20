@@ -214,27 +214,31 @@
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('dsfr:start', () => {
   const STORAGE_KEY = 'genesis_hide_tuto';
   const modal = document.getElementById('modal-tuto');
   const btnOk = document.getElementById('btn-tuto-ok');
   const chkHide = document.getElementById('hide-tuto');
 
-  // Si l'utilisateur a demandé à ne plus afficher
+  if (!modal) {
+    console.error('Modal introuvable');
+    return;
+  }
+
+  // Ne plus afficher
   if (localStorage.getItem(STORAGE_KEY) === 'true') {
     return;
   }
 
-  // OUVERTURE OFFICIELLE DSFR
-  dsfr(modal).modal.open();
+  // API DSFR DISPONIBLE ICI
+  const modalInstance = dsfr(modal).modal;
+  modalInstance.open();
 
   btnOk.addEventListener('click', () => {
     if (chkHide.checked) {
       localStorage.setItem(STORAGE_KEY, 'true');
     }
-
-    // FERMETURE OFFICIELLE DSFR
-    dsfr(modal).modal.close();
+    modalInstance.close();
   });
 });
 </script>
