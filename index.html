@@ -126,7 +126,7 @@
 </main>
 
 <!-- MODAL TUTO ENTÊTE -->
-<div class="fr-modal" id="modal-tuto" aria-labelledby="modal-tuto-title" role="dialog">
+<div class="fr-modal" id="modal-tuto" aria-labelledby="modal-tuto-title" role="dialog" aria-modal="true">
   <div class="fr-modal__body">
     <div class="fr-modal__header">
       <button class="fr-btn--close fr-btn" aria-controls="modal-tuto" title="Fermer">
@@ -216,21 +216,24 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'genesis_hide_tuto';
+  const modal = document.getElementById('modal-tuto');
+  const btnOk = document.getElementById('btn-tuto-ok');
+  const chkHide = document.getElementById('hide-tuto');
 
+  // Si l'utilisateur a demandé à ne plus afficher
   if (localStorage.getItem(STORAGE_KEY) === 'true') {
     return;
   }
 
-  dsfr('modal-tuto').modal.show();
+  // Ouvre la modal DSFR
+  modal.setAttribute('data-fr-opened', 'true');
 
-  document.getElementById('btn-tuto-ok').addEventListener('click', () => {
-    const hide = document.getElementById('hide-tuto').checked;
-
-    if (hide) {
+  btnOk.addEventListener('click', () => {
+    if (chkHide.checked) {
       localStorage.setItem(STORAGE_KEY, 'true');
     }
 
-    dsfr('modal-tuto').modal.hide();
+    modal.removeAttribute('data-fr-opened');
   });
 });
 </script>
