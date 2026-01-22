@@ -110,7 +110,7 @@
 
         <div class="fr-checkbox-group fr-mt-1w">
           <input type="checkbox" id="chk-agent">
-          <label for="chk-agent">Appareil et application expéditeur</label>
+          <label for="chk-agent">Informations sur l'appareil de l'expéditeur</label>
         </div>
 
       </div>
@@ -292,11 +292,11 @@ if (wantAgent) {
 
   if (!agentInfo) {
     blocks.push(
-      `<strong>Appareil & application</strong><br>Aucune information trouvée`
+      `<strong>Appareil utilisé et application de l'expéditeur</strong><br>Aucune information trouvée`
     );
   } else {
     blocks.push(
-      `<strong>Appareil & application</strong><br>
+      `<strong>Appareil utilisé et application de l'expéditeur</strong><br>
       <ul>
         <li><strong>Système :</strong> ${agentInfo.os}</li>
         <li><strong>Application :</strong> ${agentInfo.app}</li>
