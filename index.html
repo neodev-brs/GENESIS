@@ -290,13 +290,35 @@ function extractUserAgentInfo(text) {
 }
 
 function extractLastReceivedUTC(text) {
-  const receivedLines = text.match(/^Received:.*$/gmi);
-  if (!receivedLines || !receivedLines.length) return null;
+  // Normalisation des lignes
+  const lines = text.split(/\r?\n/);
 
-  // Le dernier Received = le plus fiable
-  const lastReceived = receivedLines[receivedLines.length - 1];
+  // Reconstitution des blocs Received (RFC compliant)
+  let receivedBlocks = [];
+  let current = null;
 
-  // On cherche la date après le ";"
+  for (const line of lines) {
+    if (/^Received:/i.test(line)) {
+      if (current) receivedBlocks.push(current);
+      current = line;
+    } else if (current && /^\s+/.test(line)) {
+      current += ' ' + line.trim();
+    } else {
+      if (current) {
+        receivedBlocks.push(current);
+        current = null;
+      }
+    }
+  }
+
+  if (current) receivedBlocks.push(current);
+
+  if (!receivedBlocks.length) return null;
+
+  // Le dernier Received = dépôt initial
+  const lastReceived = receivedBlocks[receivedBlocks.length - 1];
+
+  // Extraction de la date après le ;
   const dateMatch = lastReceived.match(/;\s*(.+)$/);
   if (!dateMatch) return null;
 
@@ -326,8 +348,8 @@ function extractLastReceivedUTC(text) {
   const ips = text.match(REGEX_IP) || [];
   const ipsUniquesTriees = [...new Set(ips)].sort();
 
- const dateUTC = extractLastReceivedUTC(text) || 'Horodatage non trouvé';
-
+  const dateUTC = extractLastReceivedUTC(text);
+  const dateDisplay = dateUTC ? dateUTC : 'Horodatage non trouvé';
 
   const ipLines = ipsUniquesTriees.map(ip =>
     `• ${ip}<br>&nbsp;&nbsp;UTC : ${dateDisplay}`
