@@ -279,6 +279,18 @@ function extractUserAgentInfo(text) {
   };
 }
 
+<script>
+  function extractDateUTC(text) {
+    const match = text.match(/^Date:\s*(.+)$/mi);
+    if (!match) return null;
+
+    const date = new Date(match[1]);
+    if (isNaN(date.getTime())) return null;
+
+    return date.toISOString().replace('T', ' ').replace('Z', ' UTC');
+  }
+</script>
+
   document.getElementById('btn-analyze').addEventListener('click', () => {
     const text = document.getElementById('inputText').value;
     const wantIP = document.getElementById('chk-ip').checked;
@@ -295,15 +307,22 @@ function extractUserAgentInfo(text) {
 
     let blocks = [];
 
-    if (wantIP) {
-      const ips = text.match(REGEX_IP) || [];
-      const ipsUniquesTriees = [...new Set(ips)].sort();
+   if (wantIP) {
+  const ips = text.match(REGEX_IP) || [];
+  const ipsUniquesTriees = [...new Set(ips)].sort();
 
-      blocks.push(
-        `<strong>Adresses IP (${ipsUniquesTriees.length})</strong><br>` +
-        (ipsUniquesTriees.length ? ipsUniquesTriees.join('<br>') : 'Aucune')
-      );
-    }
+  const dateUTC = extractDateUTC(text);
+  const dateDisplay = dateUTC ? dateUTC : 'Horodatage non trouvé';
+
+  const ipLines = ipsUniquesTriees.map(ip =>
+    `• ${ip}<br>&nbsp;&nbsp;UTC : ${dateDisplay}`
+  );
+
+  blocks.push(
+    `<strong>Adresses IP (${ipsUniquesTriees.length})</strong><br><br>` +
+    (ipLines.length ? ipLines.join('<br><br>') : 'Aucune')
+  );
+}
 
     if (wantMail) {
       const mails = text.match(REGEX_MAIL) || [];
