@@ -325,7 +325,9 @@ function extractLastReceivedUTC(text) {
   const date = new Date(dateMatch[1]);
   if (isNaN(date.getTime())) return null;
 
-  return date.toISOString().replace('T', ' ').replace('Z', ' UTC');
+return date.toISOString()
+  .replace('T', ' ')
+  .replace(/\.\d{3}Z$/, ' UTC');
 }
 
   document.getElementById('btn-analyze').addEventListener('click', () => {
