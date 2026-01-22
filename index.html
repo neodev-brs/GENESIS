@@ -326,8 +326,8 @@ function extractLastReceivedUTC(text) {
   const ips = text.match(REGEX_IP) || [];
   const ipsUniquesTriees = [...new Set(ips)].sort();
 
-  const dateUTC = extractLastReceivedUTC(text);
-  const dateDisplay = dateUTC ? dateUTC : 'Horodatage non trouvé';
+ const dateUTC = extractLastReceivedUTC(text) || 'Horodatage non trouvé';
+
 
   const ipLines = ipsUniquesTriees.map(ip =>
     `• ${ip}<br>&nbsp;&nbsp;UTC : ${dateDisplay}`
