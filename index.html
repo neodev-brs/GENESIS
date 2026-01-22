@@ -133,11 +133,21 @@
 <!-- ================= VUE TUTORIEL ================= -->
 <div id="view-tuto" hidden>
 
-  <div class="fr-container fr-mt-2w">
-    <button id="btn-back" class="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-arrow-left-line">
-      Retour
-    </button>
-  </div>
+  <button class="fr-btn fr-btn--tertiary fr-btn--icon-left" onclick="history.back()">
+  <span class="fr-icon" aria-hidden="true">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      width="1.25em"
+      height="1.25em"
+      style="vertical-align: middle;"
+    >
+      <path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z"/>
+    </svg>
+  </span>
+  Retour
+</button>
 
   <div class="fr-container fr-mt-4w">
     <h1 class="fr-h3">Comment récupérer l’entête d’un courrier électronique</h1>
