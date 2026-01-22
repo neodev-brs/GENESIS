@@ -279,7 +279,6 @@ function extractUserAgentInfo(text) {
   };
 }
 
-<script>
   function extractDateUTC(text) {
     const match = text.match(/^Date:\s*(.+)$/mi);
     if (!match) return null;
@@ -289,7 +288,6 @@ function extractUserAgentInfo(text) {
 
     return date.toISOString().replace('T', ' ').replace('Z', ' UTC');
   }
-</script>
 
   document.getElementById('btn-analyze').addEventListener('click', () => {
     const text = document.getElementById('inputText').value;
