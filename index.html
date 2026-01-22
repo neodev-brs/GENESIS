@@ -200,51 +200,79 @@
 function extractUserAgentInfo(text) {
   const lines = text.split(/\r?\n/);
 
+  const mimeLine = lines.find(l => /^mime-version:/i.test(l));
+  const xMailerLine = lines.find(l => /^x-mailer:/i.test(l));
   const uaLine = lines.find(l =>
-    /^user-agent:/i.test(l) ||
-    /^x-mailer:/i.test(l) ||
-    /^x-user-agent:/i.test(l)
+    /^user-agent:/i.test(l) || /^x-user-agent:/i.test(l)
   );
 
-  if (!uaLine) {
+  let source = '';
+  let value = '';
+
+  if (mimeLine && /\(.*\)/.test(mimeLine)) {
+    source = 'Mime-Version';
+    value = mimeLine.match(/\((.*)\)/)[1];
+  } else if (xMailerLine) {
+    source = 'X-Mailer';
+    value = xMailerLine.split(':').slice(1).join(':').trim();
+  } else if (uaLine) {
+    source = 'User-Agent';
+    value = uaLine.split(':').slice(1).join(':').trim();
+  } else {
     return null;
   }
 
-  const value = uaLine.split(':').slice(1).join(':').trim();
-
+  let device = 'Ordinateur';
   let os = 'Inconnu';
   let app = 'Inconnue';
   let version = '';
 
-  // OS
-  if (/windows nt 10/i.test(value)) os = 'Windows 10';
-  else if (/windows nt 11/i.test(value)) os = 'Windows 11';
-  else if (/mac os x/i.test(value)) os = 'macOS';
-  else if (/android/i.test(value)) os = 'Android';
-  else if (/iphone|ipad/i.test(value)) os = 'iOS';
-  else if (/linux/i.test(value)) os = 'Linux';
+  /* ================= OS + APP ================= */
 
-  // Application
-  if (/thunderbird\/([\d.]+)/i.test(value)) {
+  // 🍎 Apple Mail / macOS
+  if (/mac os x mail/i.test(value) || /apple mail/i.test(value)) {
+    os = 'macOS (Apple)';
+    app = 'Apple Mail';
+
+    const v = value.match(/mail\s([\d.]+)/i);
+    if (v) version = v[1];
+  }
+
+  // 🪟 Microsoft Outlook
+  else if (/outlook/i.test(value)) {
+    os = 'Windows';
+    app = 'Microsoft Outlook';
+
+    const v = value.match(/outlook[\s\/]?([\d.]+)/i);
+    if (v) version = v[1];
+  }
+
+  // 🦊 Thunderbird
+  else if (/thunderbird\/([\d.]+)/i.test(value)) {
     app = 'Mozilla Thunderbird';
     version = value.match(/thunderbird\/([\d.]+)/i)[1];
+
+    if (/windows/i.test(value)) os = 'Windows';
+    else if (/mac os x|macintosh/i.test(value)) os = 'macOS';
+    else if (/linux/i.test(value)) os = 'Linux';
   }
-  else if (/outlook/i.test(value)) {
-    app = 'Microsoft Outlook';
-    const m = value.match(/outlook[\s\/]?([\d.]+)/i);
-    if (m) version = m[1];
+
+  // 📱 iPhone / iPad
+  if (/iphone|ipad/i.test(value)) {
+    device = 'Mobile';
+    os = 'iOS (Apple)';
   }
-  else if (/apple mail/i.test(value)) {
-    app = 'Apple Mail';
-    const m = value.match(/\(([\d.]+)\)/);
-    if (m) version = m[1];
-  }
-  else if (/gmail/i.test(value)) {
-    app = 'Gmail';
+
+  // 🤖 Android
+  if (/android/i.test(value)) {
+    device = 'Mobile';
+    os = 'Android';
   }
 
   return {
+    source,
     raw: value,
+    device,
     os,
     app,
     version
