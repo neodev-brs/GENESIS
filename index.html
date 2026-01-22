@@ -279,15 +279,32 @@ function extractUserAgentInfo(text) {
   };
 }
 
-  function extractDateUTC(text) {
-    const match = text.match(/^Date:\s*(.+)$/mi);
-    if (!match) return null;
+ function extractDateUTC(text) {
+  const match = text.match(/^Date:\s*(.+)$/mi);
+  if (!match) return null;
 
-    const date = new Date(match[1]);
-    if (isNaN(date.getTime())) return null;
+  const date = new Date(match[1]);
+  if (isNaN(date.getTime())) return null;
 
-    return date.toISOString().replace('T', ' ').replace('Z', ' UTC');
-  }
+  return date.toISOString().replace('T', ' ').replace('Z', ' UTC');
+}
+
+function extractLastReceivedUTC(text) {
+  const receivedLines = text.match(/^Received:.*$/gmi);
+  if (!receivedLines || !receivedLines.length) return null;
+
+  // Le dernier Received = le plus fiable
+  const lastReceived = receivedLines[receivedLines.length - 1];
+
+  // On cherche la date après le ";"
+  const dateMatch = lastReceived.match(/;\s*(.+)$/);
+  if (!dateMatch) return null;
+
+  const date = new Date(dateMatch[1]);
+  if (isNaN(date.getTime())) return null;
+
+  return date.toISOString().replace('T', ' ').replace('Z', ' UTC');
+}
 
   document.getElementById('btn-analyze').addEventListener('click', () => {
     const text = document.getElementById('inputText').value;
@@ -309,7 +326,7 @@ function extractUserAgentInfo(text) {
   const ips = text.match(REGEX_IP) || [];
   const ipsUniquesTriees = [...new Set(ips)].sort();
 
-  const dateUTC = extractDateUTC(text);
+  const dateUTC = extractLastReceivedUTC(text);
   const dateDisplay = dateUTC ? dateUTC : 'Horodatage non trouvé';
 
   const ipLines = ipsUniquesTriees.map(ip =>
