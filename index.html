@@ -10,7 +10,6 @@
   <link rel="icon" type="image/png" href="https://www.interieur.gouv.fr/themes/custom/dsfr/src/images/logo/favicon.png">
 
   <!-- DSFR -->
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.1/dist/dsfr/dsfr.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.1/dist/dsfr/utility/utilities.min.css">
 
@@ -41,13 +40,11 @@
       overflow-y: auto;
     }
   </style>
-
 </head>
 
 <body>
 
 <!-- HEADER OFFICIEL -->
-
 <header role="banner" class="fr-header">
   <div class="fr-header__body">
     <div class="fr-container">
@@ -70,41 +67,47 @@
   </div>
 </header>
 
-<!-- APPLICATION -->
+<!-- ================= VUE ANALYSE ================= -->
+<div id="view-analyse">
 
 <main class="genesis-main">
   <div class="fr-container">
 
+<!-- 🔹 BOUTON TUTORIEL -->
+<button id="btn-tuto" class="fr-btn fr-btn--secondary fr-mb-2w">
+  Tutoriel
+</button>
 
 <div class="genesis-grid">
 
   <!-- GAUCHE -->
   <section>
-        <h2 class="fr-h5">Texte à analyser</h2>
+    <h2 class="fr-h5">Texte à analyser</h2>
+
     <textarea
       id="inputText"
       class="fr-input"
       placeholder="Collez ici l’entête brute du courrier électronique…"></textarea>
 
-<fieldset class="fr-fieldset fr-mt-2w">
-  <legend class="fr-fieldset__legend">
-    Types d’éléments à extraire
-  </legend>
+    <fieldset class="fr-fieldset fr-mt-2w">
+      <legend class="fr-fieldset__legend">
+        Types d’éléments à extraire
+      </legend>
 
-  <div class="fr-fieldset__content">
+      <div class="fr-fieldset__content">
 
-    <div class="fr-checkbox-group fr-mb-1w">
-      <input type="checkbox" id="chk-ip">
-      <label for="chk-ip">Adresses IP</label>
-    </div>
+        <div class="fr-checkbox-group fr-mb-1w">
+          <input type="checkbox" id="chk-ip">
+          <label for="chk-ip">Adresses IP</label>
+        </div>
 
-    <div class="fr-checkbox-group">
-      <input type="checkbox" id="chk-mail">
-      <label for="chk-mail">Adresses e-mail</label>
-    </div>
+        <div class="fr-checkbox-group">
+          <input type="checkbox" id="chk-mail">
+          <label for="chk-mail">Adresses e-mail</label>
+        </div>
 
-  </div>
-</fieldset>
+      </div>
+    </fieldset>
 
     <button id="btn-analyze" class="fr-btn fr-mt-2w">
       Analyser
@@ -120,17 +123,43 @@
   </section>
 
 </div>
-
-
-  </div>
+</div>
 </main>
 
+</div>
+
+<!-- ================= VUE TUTORIEL ================= -->
+<div id="view-tuto" hidden>
+
+  <div class="fr-container fr-mt-2w">
+    <button id="btn-back" class="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-arrow-left-line">
+      Retour
+    </button>
+  </div>
+
+  <div class="fr-container fr-mt-4w">
+    <h1 class="fr-h3">Comment récupérer l’entête d’un courrier électronique</h1>
+
+    <p>
+      Pour analyser un message, GENESIS a besoin de son <strong>entête complète</strong>.
+    </p>
+
+    <ol class="fr-mt-2w">
+      <li>Ouvrez le courrier électronique</li>
+      <li>Utilisez le raccourci <strong>Ctrl + U</strong></li>
+      <li>Copiez l’intégralité du contenu affiché</li>
+      <li>Revenez sur GENESIS</li>
+      <li>Collez le contenu dans le champ « Texte à analyser »</li>
+    </ol>
+  </div>
+
+</div>
+
 <!-- DSFR JS -->
-
 <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.1/dist/dsfr/dsfr.module.min.js" type="module"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.13.1/dist/dsfr/dsfr.nomodule.min.js" nomodule></script>
 
+<!-- SCRIPT EXISTANT (INCHANGÉ) -->
 <script>
   const REGEX_IP = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
   const REGEX_MAIL = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g;
@@ -171,6 +200,26 @@
     }
 
     output.innerHTML = blocks.join('<br><br>');
+  });
+</script>
+
+<!-- SCRIPT TUTORIEL (NOUVEAU, ISOLÉ) -->
+<script>
+  const viewAnalyse = document.getElementById('view-analyse');
+  const viewTuto = document.getElementById('view-tuto');
+  const btnTuto = document.getElementById('btn-tuto');
+  const btnBack = document.getElementById('btn-back');
+
+  btnTuto.addEventListener('click', () => {
+    viewAnalyse.hidden = true;
+    viewTuto.hidden = false;
+    window.scrollTo(0, 0);
+  });
+
+  btnBack.addEventListener('click', () => {
+    viewTuto.hidden = true;
+    viewAnalyse.hidden = false;
+    window.scrollTo(0, 0);
   });
 </script>
 
