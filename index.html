@@ -229,7 +229,7 @@ function extractUserAgentInfo(text) {
 
   /* ================= OS + APP ================= */
 
-  // 🍎 Apple Mail / macOS
+  // Apple Mail / macOS
   if (/mac os x mail/i.test(value) || /apple mail/i.test(value)) {
     os = 'macOS (Apple)';
     app = 'Apple Mail';
@@ -238,7 +238,7 @@ function extractUserAgentInfo(text) {
     if (v) version = v[1];
   }
 
-  // 🪟 Microsoft Outlook
+  // Microsoft Outlook
   else if (/outlook/i.test(value)) {
     os = 'Windows';
     app = 'Microsoft Outlook';
@@ -247,7 +247,7 @@ function extractUserAgentInfo(text) {
     if (v) version = v[1];
   }
 
-  // 🦊 Thunderbird
+  // Thunderbird
   else if (/thunderbird\/([\d.]+)/i.test(value)) {
     app = 'Mozilla Thunderbird';
     version = value.match(/thunderbird\/([\d.]+)/i)[1];
@@ -257,13 +257,13 @@ function extractUserAgentInfo(text) {
     else if (/linux/i.test(value)) os = 'Linux';
   }
 
-  // 📱 iPhone / iPad
+  // iPhone / iPad
   if (/iphone|ipad/i.test(value)) {
     device = 'Mobile';
     os = 'iOS (Apple)';
   }
 
-  // 🤖 Android
+  // Android
   if (/android/i.test(value)) {
     device = 'Mobile';
     os = 'Android';
