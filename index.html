@@ -393,11 +393,10 @@ if (wantIP) {
 
 let html = `
   <strong>Adresses IP (${uniqPublic.length})</strong><br>
-  <div class="fr-mb-1w fr-text--sm">
+  <div class="fr-mb-2w fr-text--sm">
     Horodatage : ${dateUTC}
   </div>
 `;
-
 
 html += uniqPublic.length
   ? uniqPublic.map(ip => `• ${ip}`).join('<br>')
