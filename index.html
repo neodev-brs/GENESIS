@@ -330,6 +330,35 @@ return date.toISOString()
   .replace(/\.\d{3}Z$/, ' UTC');
 }
 
+/* ================= FILTRES TECHNIQUES ================= */
+
+function isPublicIP(ip) {
+  // Exclusions RFC / techniques
+  if (
+    ip.startsWith('10.') ||
+    ip.startsWith('127.') ||
+    ip.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(ip) ||
+    ip === '0.0.0.0'
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function isHumanEmail(email) {
+  const technicalPatterns = [
+    /^.+@localhost$/i,
+    /^.+@.*\.local$/i,
+    /^.+@.*\.internal$/i,
+    /^.+@.*\.intranet$/i,
+    /^.+@.*\.interieur\.gouv\.fr$/i,
+    /^[a-f0-9-]{20,}@/i // IDs techniques
+  ];
+
+  return !technicalPatterns.some(re => re.test(email));
+}
+
   document.getElementById('btn-analyze').addEventListener('click', () => {
     const text = document.getElementById('inputText').value;
     const wantIP = document.getElementById('chk-ip').checked;
