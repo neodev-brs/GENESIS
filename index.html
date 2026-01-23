@@ -375,7 +375,7 @@ function isHumanEmail(email) {
 
     let blocks = [];
 
-  if (wantIP) {
+ if (wantIP) {
   const allIPs = text.match(REGEX_IP) || [];
 
   const publicIPs = allIPs.filter(isPublicIP);
@@ -384,12 +384,18 @@ function isHumanEmail(email) {
   const uniqPublic = [...new Set(publicIPs)].sort();
   const uniqTech = [...new Set(technicalIPs)].sort();
 
-  const dateUTC = extractLastReceivedUTC(text) || 'Horodatage non trouvé';
+  const dateUTC = extractLastReceivedUTC(text);
 
-  let html = `<strong>Adresses IP (${uniqPublic.length})</strong><br><br>`;
+  let html = `<strong>Adresses IP (${uniqPublic.length})</strong>`;
+
+  if (dateUTC) {
+    html += `<div class="fr-mt-1w fr-text--xs">Horodatage des adresses IP : <strong>${dateUTC}</strong></div>`;
+  }
+
+  html += `<br>`;
 
   html += uniqPublic.length
-    ? uniqPublic.map(ip => `• ${ip}<br>&nbsp;&nbsp;UTC : ${dateUTC}`).join('<br><br>')
+    ? uniqPublic.map(ip => `• ${ip}`).join('<br>')
     : 'Aucune adresse IP publique trouvée';
 
   if (uniqTech.length) {
