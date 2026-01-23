@@ -368,14 +368,19 @@ function isHumanEmail(email) {
 
     output.innerHTML = '';
 
-    if (!wantIP && !wantMail) {
-      output.textContent = 'Sélectionnez au moins un type d’analyse.';
-      return;
-    }
+  if (!wantIP && !wantMail && !wantAgent) {
+  output.textContent = 'Sélectionnez au moins un type d’analyse.';
+  return;
+}
+
+if ((wantIP || wantMail || wantAgent) && !text.trim()) {
+  output.textContent = 'Veuillez coller une entête avant de lancer l’analyse.';
+  return;
+}
 
     let blocks = [];
 
- if (wantIP) {
+if (wantIP) {
   const allIPs = text.match(REGEX_IP) || [];
 
   const publicIPs = allIPs.filter(isPublicIP);
@@ -389,10 +394,12 @@ function isHumanEmail(email) {
   let html = `<strong>Adresses IP (${uniqPublic.length})</strong>`;
 
   if (dateUTC) {
-    html += `<div class="fr-mt-1w fr-text--xs">Horodatage des adresses IP : <strong>${dateUTC}</strong></div>`;
+    html += `
+      <div class="fr-text--sm" style="margin:2px 0 6px 0;">
+        Horodatage (dernier Received) : <strong>${dateUTC}</strong>
+      </div>
+    `;
   }
-
-  html += `<br>`;
 
   html += uniqPublic.length
     ? uniqPublic.map(ip => `• ${ip}`).join('<br>')
