@@ -391,19 +391,24 @@ if (wantIP) {
 
   const dateUTC = extractLastReceivedUTC(text);
 
-  let html = `<strong>Adresses IP (${uniqPublic.length})</strong>`;
+let html = `
+  <strong>Adresses IP (${uniqPublic.length})</strong><br>
+  <div class="fr-mb-1w fr-text--sm">
+    Horodatage : ${dateUTC}
+  </div>
+`;
 
   if (dateUTC) {
     html += `
       <div class="fr-text--sm" style="margin:2px 0 6px 0;">
-        Horodatage (dernier Received) : <strong>${dateUTC}</strong>
+        Horodatage : ${dateUTC}
       </div>
     `;
   }
 
-  html += uniqPublic.length
-    ? uniqPublic.map(ip => `• ${ip}`).join('<br>')
-    : 'Aucune adresse IP publique trouvée';
+html += uniqPublic.length
+  ? uniqPublic.map(ip => `• ${ip}`).join('<br>')
+  : 'Aucune adresse IP publique trouvée';
 
   if (uniqTech.length) {
     html += `
