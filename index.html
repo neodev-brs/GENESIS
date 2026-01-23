@@ -398,13 +398,6 @@ let html = `
   </div>
 `;
 
-  if (dateUTC) {
-    html += `
-      <div class="fr-text--sm" style="margin:2px 0 6px 0;">
-        Horodatage : ${dateUTC}
-      </div>
-    `;
-  }
 
 html += uniqPublic.length
   ? uniqPublic.map(ip => `• ${ip}`).join('<br>')
