@@ -346,32 +346,65 @@ return date.toISOString()
 
     let blocks = [];
 
-   if (wantIP) {
-  const ips = text.match(REGEX_IP) || [];
-  const ipsUniquesTriees = [...new Set(ips)].sort();
+  if (wantIP) {
+  const allIPs = text.match(REGEX_IP) || [];
 
-  const dateUTC = extractLastReceivedUTC(text);
-  const dateDisplay = dateUTC ? dateUTC : 'Horodatage non trouvé';
+  const publicIPs = allIPs.filter(isPublicIP);
+  const technicalIPs = allIPs.filter(ip => !isPublicIP(ip));
 
-  const ipLines = ipsUniquesTriees.map(ip =>
-    `• ${ip}<br>&nbsp;&nbsp;UTC : ${dateDisplay}`
-  );
+  const uniqPublic = [...new Set(publicIPs)].sort();
+  const uniqTech = [...new Set(technicalIPs)].sort();
 
-  blocks.push(
-    `<strong>Adresses IP (${ipsUniquesTriees.length})</strong><br><br>` +
-    (ipLines.length ? ipLines.join('<br><br>') : 'Aucune')
-  );
+  const dateUTC = extractLastReceivedUTC(text) || 'Horodatage non trouvé';
+
+  let html = `<strong>Adresses IP (${uniqPublic.length})</strong><br><br>`;
+
+  html += uniqPublic.length
+    ? uniqPublic.map(ip => `• ${ip}<br>&nbsp;&nbsp;UTC : ${dateUTC}`).join('<br><br>')
+    : 'Aucune adresse IP publique trouvée';
+
+  if (uniqTech.length) {
+    html += `
+      <details class="fr-mt-2w">
+        <summary>Voir les résultats techniques (${uniqTech.length})</summary>
+        <div class="fr-mt-1w fr-text--sm">
+          ${uniqTech.map(ip => `• ${ip}`).join('<br>')}
+        </div>
+      </details>
+    `;
+  }
+
+  blocks.push(html);
 }
 
-    if (wantMail) {
-      const mails = text.match(REGEX_MAIL) || [];
-      const mailsUniquesTries = [...new Set(mails)].sort();
+   if (wantMail) {
+  const allMails = text.match(REGEX_MAIL) || [];
 
-      blocks.push(
-        `<strong>Adresses e-mail (${mailsUniquesTries.length})</strong><br>` +
-        (mailsUniquesTries.length ? mailsUniquesTries.join('<br>') : 'Aucune')
-      );
-    }
+  const humanMails = allMails.filter(isHumanEmail);
+  const technicalMails = allMails.filter(m => !isHumanEmail(m));
+
+  const uniqHuman = [...new Set(humanMails)].sort();
+  const uniqTech = [...new Set(technicalMails)].sort();
+
+  let html = `<strong>Adresses e-mail (${uniqHuman.length})</strong><br><br>`;
+
+  html += uniqHuman.length
+    ? uniqHuman.join('<br>')
+    : 'Aucune adresse e-mail pertinente trouvée';
+
+  if (uniqTech.length) {
+    html += `
+      <details class="fr-mt-2w">
+        <summary>Voir les résultats techniques (${uniqTech.length})</summary>
+        <div class="fr-mt-1w fr-text--sm">
+          ${uniqTech.join('<br>')}
+        </div>
+      </details>
+    `;
+  }
+
+  blocks.push(html);
+}
 
 if (wantAgent) {
   const agentInfo = extractUserAgentInfo(text);
