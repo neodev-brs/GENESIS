@@ -207,6 +207,7 @@
 }
 
   const REGEX_IP = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
+  const REGEX_IPV6 = /\b(?:[a-fA-F0-9]{1,4}:){2,7}[a-fA-F0-9]{1,4}\b|\b(?:[a-fA-F0-9]{1,4}:){1,7}:|\b:(?::[a-fA-F0-9]{1,4}){1,7}\b/g;
   const REGEX_MAIL = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g;
 
 function extractUserAgentInfo(text) {
@@ -396,7 +397,9 @@ if ((wantIP || wantMail || wantAgent) && !text.trim()) {
     let blocks = [];
 
 if (wantIP) {
-  const allIPs = text.match(REGEX_IP) || [];
+const ipv4 = text.match(REGEX_IP) || [];
+const ipv6 = text.match(REGEX_IPV6) || [];
+const allIPs = [...ipv4, ...ipv6];
 
   const publicIPs = allIPs.filter(isPublicIP);
   const technicalIPs = allIPs.filter(ip => !isPublicIP(ip));
