@@ -405,7 +405,6 @@ const ipv4 = (text.match(REGEX_IPV4) || []).filter(ip => !looksLikeTime(ip));
 const ipv6 = text.match(REGEX_IPV6) || [];
 const allIPs = [...ipv4, ...ipv6];
 
-
   const publicIPs = allIPs.filter(isPublicIP);
   const technicalIPs = allIPs.filter(ip => !isPublicIP(ip));
 
