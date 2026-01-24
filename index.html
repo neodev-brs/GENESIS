@@ -359,12 +359,14 @@ function isPublicIP(ip) {
 
 function isHumanEmail(email) {
   const technicalPatterns = [
-    /^.+@localhost$/i,
-    /^.+@.*\.local$/i,
-    /^.+@.*\.internal$/i,
-    /^.+@.*\.intranet$/i,
-    /^.+@.*\.interieur\.gouv\.fr$/i,
-    /^[a-f0-9-]{20,}@/i // IDs techniques
+    /^[a-f0-9-]{32,}@/i,        // UUID / GUID longs
+    /^[a-f0-9-]{20,}@/i,
+    /^[a-z0-9]{16,}@/i,         // hash brut
+    /^[a-z]@/i,                 // e@domaine
+    /^mailer-daemon@/i,
+    /^postmaster@/i,
+    /^no-reply@/i,
+    /^noreply@/i
   ];
 
   return !technicalPatterns.some(re => re.test(email));
