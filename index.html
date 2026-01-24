@@ -194,6 +194,17 @@
 
 <!-- SCRIPT EXISTANT (INCHANGÉ) -->
 <script>
+
+  function decodeQuotedPrintable(text) {
+  return text
+    // suppression des coupures soft line break
+    .replace(/=\r?\n/g, '')
+    // décodage hexadécimal (=2E → .)
+    .replace(/=([A-F0-9]{2})/gi, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16))
+    );
+}
+
   const REGEX_IP = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
   const REGEX_MAIL = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g;
 
@@ -360,7 +371,8 @@ function isHumanEmail(email) {
 }
 
   document.getElementById('btn-analyze').addEventListener('click', () => {
-    const text = document.getElementById('inputText').value;
+    const rawText = document.getElementById('inputText').value;
+    const text = decodeQuotedPrintable(rawText);
     const wantIP = document.getElementById('chk-ip').checked;
     const wantMail = document.getElementById('chk-mail').checked;
     const wantAgent = document.getElementById('chk-agent').checked;
