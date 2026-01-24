@@ -210,8 +210,14 @@
   const REGEX_IPV6 = /\b(?:[a-fA-F0-9]{1,4}:){2,7}[a-fA-F0-9]{1,4}\b|\b(?:[a-fA-F0-9]{1,4}:){1,7}:|\b:(?::[a-fA-F0-9]{1,4}){1,7}\b/g;
   const REGEX_MAIL = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g;
 
-  function looksLikeTime(value) {
-  return /^\d{1,2}:\d{2}:\d{2}$/.test(value);
+  function looksLikeFakeIPv6(value) {
+  // Heure HH:MM:SS
+  if (/^\d{1,2}:\d{2}:\d{2}$/.test(value)) return true;
+
+  // IPv6 uniquement numérique (pas de a-f)
+  if (/^[0-9:]+$/.test(value)) return true;
+
+  return false;
 }
 
 function extractUserAgentInfo(text) {
@@ -401,8 +407,9 @@ if ((wantIP || wantMail || wantAgent) && !text.trim()) {
     let blocks = [];
 
 if (wantIP) {
-const ipv4 = (text.match(REGEX_IPV4) || []).filter(ip => !looksLikeTime(ip));
-const ipv6 = text.match(REGEX_IPV6) || [];
+const ipv4 = text.match(REGEX_IPV4) || [];
+const ipv6 = (text.match(REGEX_IPV6) || []).filter(ip => !looksLikeFakeIPv6(ip));
+
 const allIPs = [...ipv4, ...ipv6];
 
   const publicIPs = allIPs.filter(isPublicIP);
