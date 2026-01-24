@@ -206,7 +206,6 @@
     );
 }
 
-  const REGEX_IPV4 = /(?<!\d)(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}(?!\d)/g;
   const REGEX_IPV6 = /\b(?:[a-fA-F0-9]{1,4}:){2,7}[a-fA-F0-9]{1,4}\b|\b(?:[a-fA-F0-9]{1,4}:){1,7}:|\b:(?::[a-fA-F0-9]{1,4}){1,7}\b/g;
   const REGEX_MAIL = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g;
 
@@ -407,10 +406,7 @@ if ((wantIP || wantMail || wantAgent) && !text.trim()) {
     let blocks = [];
 
 if (wantIP) {
-const ipv4 = text.match(REGEX_IPV4) || [];
-const ipv6 = (text.match(REGEX_IPV6) || []).filter(ip => !looksLikeFakeIPv6(ip));
-
-const allIPs = [...ipv4, ...ipv6];
+const allIPs = extractIPsFromReceived(text);
 
   const publicIPs = allIPs.filter(isPublicIP);
   const technicalIPs = allIPs.filter(ip => !isPublicIP(ip));
@@ -426,6 +422,43 @@ let html = `
     Horodatage : ${dateUTC}
   </div>
 `;
+
+function extractIPsFromReceived(text) {
+  const lines = text.split(/\r?\n/);
+
+  // Reconstitution des blocs Received (RFC compliant)
+  let receivedBlocks = [];
+  let current = null;
+
+  for (const line of lines) {
+    if (/^Received:/i.test(line)) {
+      if (current) receivedBlocks.push(current);
+      current = line;
+    } else if (current && /^\s+/.test(line)) {
+      current += ' ' + line.trim();
+    } else {
+      if (current) {
+        receivedBlocks.push(current);
+        current = null;
+      }
+    }
+  }
+  if (current) receivedBlocks.push(current);
+
+  const ips = [];
+
+  for (const block of receivedBlocks) {
+    // IP entre crochets [x.x.x.x]
+    const bracketIPs = block.match(/\[(\d{1,3}(?:\.\d{1,3}){3})\]/g) || [];
+    bracketIPs.forEach(ip => ips.push(ip.replace(/[\[\]]/g, '')));
+
+    // client-ip=143.126.250.56
+    const clientIP = block.match(/client-ip=(\d{1,3}(?:\.\d{1,3}){3})/i);
+    if (clientIP) ips.push(clientIP[1]);
+  }
+
+  return ips;
+}
 
 html += uniqPublic.length
   ? uniqPublic.map(ip => `• ${ip}`).join('<br>')
