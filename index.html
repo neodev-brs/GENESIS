@@ -311,12 +311,32 @@
 
   // IPv4 strict (0-255) + “bornes” sans lookbehind (compat)
   function extractIPv4FromText(s) {
-    const re = /(^|[^\d.])((?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3})(?=$|[^\d.])/g;
-    const out = [];
-    let m;
-    while ((m = re.exec(s)) !== null) out.push(m[2]);
-    return out;
+  const out = [];
+  const re = /\d{1,3}(?:\.\d{1,3}){3}/g;
+
+  for (const m of s.matchAll(re)) {
+    const ip = m[0];
+    const idx = m.index ?? 0;
+
+    // Bornes strictes : pas de chiffre ni point collé avant/après
+    const before = idx > 0 ? s[idx - 1] : '';
+    const after = idx + ip.length < s.length ? s[idx + ip.length] : '';
+    if ((before && /[\d.]/.test(before)) || (after && /[\d.]/.test(after))) continue;
+
+    // Validation 0-255 sur chaque octet
+    const parts = ip.split('.');
+    if (parts.length !== 4) continue;
+    if (!parts.every(p => {
+      if (p.length > 1 && p.startsWith('0')) return true; // ok, on accepte 001 etc (ça arrive)
+      const n = Number(p);
+      return Number.isInteger(n) && n >= 0 && n <= 255;
+    })) continue;
+
+    out.push(ip);
   }
+
+  return out;
+}
 
   // IPv6 + port si sous forme [IPv6:addr]:port ou [addr]:port
   function extractIPv6WithOptionalPortFromText(s) {
