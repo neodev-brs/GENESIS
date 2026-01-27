@@ -39,6 +39,19 @@
       background: var(--background-alt-grey);
       overflow-y: auto;
     }
+
+    .genesis-credit {
+  position: fixed;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: #666;
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+}
+
   </style>
 </head>
 
@@ -614,6 +627,10 @@ function removeTruncatedIPv4(list) {
     window.scrollTo(0, 0);
   });
 </script>
+
+<footer class="genesis-credit">
+  GENESIS 2026 - MDC BRES--MALANCHERE
+</footer>
 
 </body>
 </html>
