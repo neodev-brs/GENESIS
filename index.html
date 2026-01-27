@@ -230,19 +230,50 @@
     return true;
   }
 
-  function isHumanEmail(email) {
-    const technicalPatterns = [
-      /^[a-f0-9-]{32,}@/i,        // UUID/GUID longs
-      /^[a-f0-9-]{20,}@/i,
-      /^[a-z0-9]{16,}@/i,         // hash brut
-      /^[a-z]@/i,                 // e@domaine
-      /^mailer-daemon@/i,
-      /^postmaster@/i,
-      /^no-reply@/i,
-      /^noreply@/i
-    ];
-    return !technicalPatterns.some(re => re.test(email));
-  }
+ function isHumanEmail(email) {
+  const e = email.trim();
+
+  // découpage sûr
+  const at = e.lastIndexOf('@');
+  if (at === -1) return false;
+
+  const local = e.slice(0, at);
+  const domain = e.slice(at + 1);
+
+  // 1) Patterns techniques "connus"
+  const technicalPatterns = [
+    /^[a-f0-9-]{32,}@/i,                  // UUID/GUID longs
+    /^[a-f0-9-]{20,}@/i,
+    /^[a-z0-9]{16,}@/i,                   // hash brut
+    /^[a-z]@/i,                           // e@domaine
+    /^mailer-daemon@/i,
+    /^postmaster@/i,
+    /^no-?reply@/i,
+
+    // ✅ JavaMail / Zimbra / Message-ID “num.num.num.JavaMail....@...”
+    /^\d+(?:\.\d+){2,}\.JavaMail\./i,     // ex: 1860....JavaMail....
+    /JavaMail/i                           // au cas où la forme varie
+  ];
+
+  if (technicalPatterns.some(re => re.test(e))) return false;
+
+  // 2) Heuristique : local-part quasi uniquement chiffres + points => technique
+  // ex: 1860615222.5237975.1761839501357
+  const letters = (local.match(/[a-zA-Z]/g) || []).length;
+  const digits  = (local.match(/[0-9]/g) || []).length;
+  const dots    = (local.match(/\./g) || []).length;
+
+  const len = local.length;
+
+  // Si pas de lettres, beaucoup de chiffres, et au moins 2 points : très probablement un ID
+  if (letters === 0 && dots >= 2 && digits >= 10) return false;
+
+  // Local-part hyper long + très "numérique"
+  if (len >= 25 && digits / Math.max(1, len) > 0.7) return false;
+
+  // sinon : on considère "humain"
+  return true;
+}
 
   /* ================= HORODATAGE (dernier Received) ================= */
 
