@@ -290,8 +290,18 @@
       if (/^(Received|X-Received):/i.test(line)) {
         if (current) blocks.push(current);
         current = line;
-      } else if (current && /^\s+/.test(line)) {
-        current += ' ' + line.trim();
+     } else if (current && /^\s+/.test(line)) {
+  const cont = line.trim();
+
+  // Si ça ressemble à une coupure au milieu d'une IP / token, on recolle SANS espace
+  const end = current.slice(-1);
+  const start = cont.charAt(0);
+
+  const ipLikeEnd = /[0-9A-Fa-f\.\:\[\]]/.test(end);
+  const ipLikeStart = /[0-9A-Fa-f\.\:\[\]]/.test(start);
+
+  current += (ipLikeEnd && ipLikeStart) ? cont : (' ' + cont);
+  
       } else {
         if (current) {
           blocks.push(current);
