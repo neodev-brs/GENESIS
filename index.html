@@ -369,21 +369,51 @@ function extractIPv4FromText(s) {
     return true;
   }
 
-  function extractIPsFromHeaders(text) {
-    const linesToScan = getHeaderLinesForIPScan(text);
+// Ne scanne que les entêtes (avant la 1ère ligne vide)
+function getHeaderSection(text) {
+  const parts = text.split(/\r?\n\r?\n/);
+  return parts[0] || text;
+}
 
-    const found = [];
+// Supprime les IPv4 tronquées type 9.85.220.41 si 209.85.220.41 existe
+function removeTruncatedIPv4(list) {
+  const ipv4 = list.filter(x => !x.includes(':'));
+  const others = new Set(ipv4);
 
-    for (const line of linesToScan) {
-      // IPv4 : on prend toutes les IPv4 strictes sur ces lignes “fiables”
-      found.push(...extractIPv4FromText(line));
+  return list.filter(ip => {
+    if (ip.includes(':')) return true; // IPv6 inchangé
 
-      // IPv6 : idem + port si présent
-      found.push(...extractIPv6WithOptionalPortFromText(line));
+    for (const full of others) {
+      if (full === ip) continue;
+
+      // Ex : full="209.85.220.41" ip="9.85.220.41" => full.endsWith(ip) true
+      if (full.length > ip.length && full.endsWith(ip)) {
+        const idx = full.length - ip.length - 1; // caractère juste avant le suffixe
+        if (idx >= 0 && /[0-9]/.test(full[idx])) {
+          return false; // ip tronquée => on jette
+        }
+      }
     }
+    return true;
+  });
+}
 
-    return found;
+  function extractIPsFromHeaders(text) {
+  const headerText = getHeaderSection(text); // <-- important
+  const linesToScan = getHeaderLinesForIPScan(headerText);
+
+  let found = [];
+
+  for (const line of linesToScan) {
+    found.push(...extractIPv4FromText(line));
+    found.push(...extractIPv6WithOptionalPortFromText(line));
   }
+
+  // Nettoyage : vire les IPv4 tronquées (3.126... si 143.126... existe, etc.)
+  found = removeTruncatedIPv4(found);
+
+  return found;
+}
 
   /* ================= USER-AGENT / X-Mailer ================= */
 
