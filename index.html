@@ -963,6 +963,20 @@ function extractPostalAddressesStructured(text) {
     if (!lines.length) return;
 
     const joined = normSpaces(lines.join(", "));
+if (lines.length === 1 && CP_RE.test(lines[0])) {
+  const one = normSpaces(lines[0]).replace(/\bFR\b/ig, "").trim();
+  const m = one.match(/^(.*?)(\b\d{5}\b)\s+(.+?)\s*$/i);
+  if (m) {
+    const adresse = normSpaces(m[1]);
+    const cp = m[2];
+    const ville = normSpaces(m[3]);
+  if (adresse && ville) {
+      addRow(adresse, ville, cp);
+      return;
+    }
+  }
+}
+
     if (joined.includes(",") && CP_RE.test(joined)) {
       const parsed = parseCommaAddress(joined);
       if (parsed) addRow(parsed.adresse, parsed.ville, parsed.codePostal);
