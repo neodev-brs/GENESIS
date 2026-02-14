@@ -29,6 +29,19 @@
   margin-left: auto;
 }
 
+/* Barre header et ombre */
+.genesis-header-shadow {
+  position: sticky;   /* optionnel, mais c’est souvent le rendu “barre” attendu */
+  top: 0;
+  z-index: 1000;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
+}
+
+.genesis-header-shadow .fr-header__body {
+  border-bottom: 1px solid var(--border-default-grey);
+}
+
 /* Barre boutons */
 .genesis-actions {
   display: grid;
@@ -123,7 +136,7 @@
 <body>
 
 <!-- HEADER OFFICIEL -->
-<header role="banner" class="fr-header">
+<header role="banner" class="fr-header genesis-header-shadow">
   <div class="fr-header__body">
     <div class="fr-container">
       <div class="fr-header__body-row">
