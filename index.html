@@ -548,7 +548,7 @@
 
   const REGEX_MAIL = /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g;
 
-  // OUTILS
+  // EXCLUSION DES ADRESSES "TECHNIQUES"
   function escapeHTML(s) {
     return String(s || '')
       .replace(/&/g, "&amp;")
@@ -752,6 +752,41 @@
     found = removeTruncatedIPv6(found);
     return [...new Set(found)].sort();
   }
+
+//HORODATAGE
+  function extractLastReceivedUTC(text) {
+  const lines = text.split(/\r?\n/);
+  let receivedBlocks = [];
+  let current = null;
+
+  for (const line of lines) {
+    if (/^Received:/i.test(line)) {
+      if (current) receivedBlocks.push(current);
+      current = line;
+    } else if (current && /^\s+/.test(line)) {
+      current += ' ' + line.trim();
+    } else {
+      if (current) {
+        receivedBlocks.push(current);
+        current = null;
+      }
+    }
+  }
+  if (current) receivedBlocks.push(current);
+  if (!receivedBlocks.length) return null;
+
+  const lastReceived = receivedBlocks[receivedBlocks.length - 1];
+  const dateMatch = lastReceived.match(/;\s*(.+)$/);
+  if (!dateMatch) return null;
+
+  const date = new Date(dateMatch[1]);
+  if (isNaN(date.getTime())) return null;
+
+  return date
+    .toISOString()
+    .replace('T', ' ')
+    .replace(/\.\d{3}Z$/, ' UTC');
+}
 
   // REQUISITIONS REGEX
   const REGEX_PHONE =
@@ -1081,15 +1116,22 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
     const blocks = [];
 
     if (wantIP) {
-      const allIPs = extractIPsFromPlainText(text);
-      const publicIPs = allIPs.filter(isPublicIP);
-      const technicalIPs = allIPs.filter(ip => !isPublicIP(ip));
+  const allIPs = extractIPsFromPlainText(text);
+  const publicIPs = allIPs.filter(isPublicIP);
+  const technicalIPs = allIPs.filter(ip => !isPublicIP(ip));
 
-      const uniqPublic = [...new Set(publicIPs)].sort();
-      const uniqTech = [...new Set(technicalIPs)].sort();
+  const uniqPublic = [...new Set(publicIPs)].sort();
+  const uniqTech = [...new Set(technicalIPs)].sort();
 
-      let html = `<strong>Adresses IP (${uniqPublic.length})</strong><br><br>`;
-      html += uniqPublic.length ? uniqPublic.map(ip => `• ${ip}`).join('<br>') : 'Aucune adresse IP publique trouvée';
+  const dateUTC = extractLastReceivedUTC(text) || 'Horodatage non trouvé';
+
+  let html = `
+    <strong>Adresses IP (${uniqPublic.length})</strong><br>
+    <div class="fr-text--sm fr-mb-1w">
+      Horodatage : ${dateUTC}
+    </div>
+    <br>
+  `;
 
       if (uniqTech.length) {
         html += `
