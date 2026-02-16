@@ -142,7 +142,7 @@
   <div class="fr-header__body">
     <div class="fr-container">
       <div class="fr-header__body-row">
-        <div class="fr-header__brand fr-enlarge-link">
+        <div class="fr-header__brand fr-enlarge-link" id="header-home">
           <div class="fr-header__brand-top">
             <div class="fr-header__logo">
               <p class="fr-logo">Ministère<br>de l’Intérieur</p>
@@ -1336,6 +1336,13 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
   const btnBackHomeFromReq  = document.getElementById('btn-back-home-from-req');
   const btnShowTutoFromReq  = document.getElementById('btn-show-tuto-from-req');
   const btnBackReq          = document.getElementById('btn-back-req');
+  const headerHome          = document.getElementById('header-home');
+
+headerHome?.addEventListener('click', (e) => {
+  e.preventDefault();
+  showView(viewHome);
+});
+
 
   function showView(target) {
     viewHome.hidden = true;
@@ -1380,6 +1387,7 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
   // RETOURS ACCUEIL
   btnBackHome?.addEventListener('click', () => showView(viewHome));
   btnBackHomeFromReq?.addEventListener('click', () => showView(viewHome));
+
 </script>
 
 <footer class="genesis-credit">
