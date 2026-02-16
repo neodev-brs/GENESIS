@@ -754,6 +754,9 @@
   }
 
 //HORODATAGE
+const headerText = text.split(/\r?\n\r?\n/)[0] || text;
+const dateUTC = extractLastReceivedUTC(headerText) || 'Horodatage non trouvé';
+
   function extractLastReceivedUTC(text) {
   const lines = text.split(/\r?\n/);
   let receivedBlocks = [];
@@ -1133,18 +1136,23 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
     <br>
   `;
 
-      if (uniqTech.length) {
-        html += `
-          <details class="fr-mt-2w">
-            <summary>Voir les résultats techniques (${uniqTech.length})</summary>
-            <div class="fr-mt-1w fr-text--sm">
-              ${uniqTech.map(ip => `• ${ip}`).join('<br>')}
-            </div>
-          </details>
-        `;
-      }
-      blocks.push(html);
-    }
+  html += uniqPublic.length
+    ? uniqPublic.map(ip => `• ${ip}`).join('<br>')
+    : 'Aucune adresse IP publique trouvée';
+
+  if (uniqTech.length) {
+    html += `
+      <details class="fr-mt-2w">
+        <summary>Voir les résultats techniques (${uniqTech.length})</summary>
+        <div class="fr-mt-1w fr-text--sm">
+          ${uniqTech.map(ip => `• ${ip}`).join('<br>')}
+        </div>
+      </details>
+    `;
+  }
+
+  blocks.push(html);
+}
 
     if (wantMail) {
       const allMails = text.match(REGEX_MAIL) || [];
