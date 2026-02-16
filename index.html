@@ -754,9 +754,6 @@
   }
 
 //HORODATAGE
-const headerText = text.split(/\r?\n\r?\n/)[0] || text;
-const dateUTC = extractLastReceivedUTC(headerText) || 'Horodatage non trouvé';
-
   function extractLastReceivedUTC(text) {
   const lines = text.split(/\r?\n/);
   let receivedBlocks = [];
