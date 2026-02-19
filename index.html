@@ -81,6 +81,20 @@
   background: var(--background-alt-grey);
 }
 
+.results .results-footer{
+  min-height: 44px;           /* évite les variations */
+  box-sizing: border-box;
+}
+
+.copy-feedback{
+  margin-top: 0;              /* au cas où */
+}
+
+.copy-feedback .fr-icon-check-line{
+  line-height: 1;
+  display: inline-block;
+}
+
 .copy-feedback{
   display: inline-flex;
   align-items: center;
@@ -347,7 +361,7 @@
       <div class="genesis-grid">
         <!-- GAUCHE -->
         <section>
-          <h2 class="fr-h5">Texte à analyser</h2>
+          <h2 class="fr-h5 fr-mb-1w">Texte à analyser</h2>
 
           <textarea
             id="inputText"
@@ -393,11 +407,11 @@
             </div>
 
             <div class="results-footer">
-              <button id="btn-copy-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button" disabled>Copier</button>
+              <button id="btn-copy-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button" disabled>
                 Copier
               </button>
 
-              <span id="copy-feedback-results" class="copy-feedback fr-text--xs">
+              <span id="copy-feedback-results" class="copy-feedback fr-text--xs" aria-live="polite">
                 <span class="fr-icon-check-line" aria-hidden="true"></span>
                 Copié dans le presse-papiers
               </span>
@@ -490,11 +504,11 @@
             </div>
 
             <div class="results-footer">
-              <button id="btn-copy-req-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button" disabled>Copier</button>
+              <button id="btn-copy-req-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button" disabled>
                 Copier
               </button>
 
-              <span id="copy-feedback-req" class="copy-feedback fr-text--xs">
+              <span id="copy-feedback-req" class="copy-feedback fr-text--xs" aria-live="polite">
                 <span class="fr-icon-check-line" aria-hidden="true"></span>
                 Copié dans le presse-papiers
               </span>
@@ -1196,6 +1210,7 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
     }
 
     const blocks = [];
+    
 
     if (wantIP) {
   const allIPs = extractIPsFromPlainText(text);
@@ -1275,6 +1290,7 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
   }
 }
     output.innerHTML = blocks.join('<br><br>');
+    setCopyEnabled('results', 'btn-copy-results');
   });
 
 // BOUTON COPIER LES RESULTATS
@@ -1346,6 +1362,19 @@ document.addEventListener('DOMContentLoaded', () => {
   setCopyButtonState('results', 'btn-copy-results');
   setCopyButtonState('req-results', 'btn-copy-req-results');
 });
+
+function setCopyEnabled(boxId, btnId) {
+  const box = document.getElementById(boxId);
+  const btn = document.getElementById(btnId);
+  if (!box || !btn) return;
+
+  const content = box.querySelector('.results-content');
+  const text = (content?.innerText || '').trim();
+
+  const hasRealResult = text && !/^Aucun résultat/i.test(text);
+
+  btn.disabled = !hasRealResult;
+}
 
   // LISTENER REQUISITIONS
   document.getElementById('btn-req-analyze')?.addEventListener('click', () => {
@@ -1469,6 +1498,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     output.innerHTML = blocks.join('<br><br>');
+    setCopyEnabled('req-results', 'btn-copy-req-results');
   });
 </script>
 
