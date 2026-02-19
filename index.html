@@ -46,36 +46,58 @@
 } */
 
 /* BOUTON COPIER CSS */
-.results {
-  position: relative;
-  padding-bottom: 3.25rem; /* place pour la barre du bas */
+.results{
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  padding: 1rem;
+  border: 1px solid var(--border-default-grey);
+  background: var(--background-alt-grey);
+  overflow-y: auto;
 }
 
-.results-footer {
+.results .results-content{
+  flex: 1 1 auto;
+  min-height: 1px;
+}
+.results .results-footer{
+  flex: 0 0 auto;
+  margin-top: auto;
   position: sticky;
   bottom: 0;
   left: 0;
+
   display: flex;
   align-items: center;
   gap: .75rem;
+
   padding-top: .75rem;
-  margin-top: 1rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
   border-top: 1px solid var(--border-default-grey);
   background: var(--background-alt-grey);
 }
 
-.copy-feedback {
+.copy-feedback{
   display: inline-flex;
   align-items: center;
   gap: .35rem;
+  line-height: 1;
   opacity: 0;
   transform: translateY(2px);
   transition: opacity .18s ease, transform .18s ease;
 }
-
-.copy-feedback.is-visible {
+.copy-feedback.is-visible{
   opacity: 1;
   transform: translateY(0);
+}
+
+.fr-btn:disabled{
+  opacity: .45;
+  cursor: not-allowed;
 }
 
 /* Barre boutons */
@@ -371,7 +393,7 @@
             </div>
 
             <div class="results-footer">
-              <button id="btn-copy-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button">
+              <button id="btn-copy-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button" disabled>Copier</button>
                 Copier
               </button>
 
@@ -468,7 +490,7 @@
             </div>
 
             <div class="results-footer">
-              <button id="btn-copy-req-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button">
+              <button id="btn-copy-req-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button" disabled>Copier</button>
                 Copier
               </button>
 
@@ -1255,12 +1277,11 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
     output.innerHTML = blocks.join('<br><br>');
   });
 
-  // BOUTON COPIER LES RESULTATS
+// BOUTON COPIER LES RESULTATS
 function getCleanTextFromResults(containerId) {
   const box = document.getElementById(containerId);
   if (!box) return '';
 
-  // On copie le texte visible de la zone (y compris les tables), mais pas la barre du bas
   const content = box.querySelector('.results-content') || box;
   return (content.innerText || '')
     .replace(/\u00a0/g, ' ')
@@ -1286,7 +1307,6 @@ async function copyFromResults(containerId, feedbackId) {
     await navigator.clipboard.writeText(text);
     showCopyFeedback(feedbackId);
   } catch (e) {
-    // fallback
     try {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -1298,7 +1318,6 @@ async function copyFromResults(containerId, feedbackId) {
       document.body.removeChild(ta);
       showCopyFeedback(feedbackId);
     } catch (err) {
-      // en dernier recours : rien (ou tu peux afficher un message dans results-content)
     }
   }
 }
@@ -1309,6 +1328,23 @@ document.getElementById('btn-copy-results')?.addEventListener('click', () => {
 
 document.getElementById('btn-copy-req-results')?.addEventListener('click', () => {
   copyFromResults('req-results', 'copy-feedback-req');
+});
+
+function setCopyButtonState(containerId, btnId) {
+  const box = document.getElementById(containerId);
+  const btn = document.getElementById(btnId);
+  if (!box || !btn) return;
+
+  const content = box.querySelector('.results-content') || box;
+  const t = (content.innerText || '').replace(/\u00a0/g,' ').trim();
+
+  const hasResults = t && t !== 'Aucun résultat pour le moment.';
+  btn.disabled = !hasResults;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setCopyButtonState('results', 'btn-copy-results');
+  setCopyButtonState('req-results', 'btn-copy-req-results');
 });
 
   // LISTENER REQUISITIONS
