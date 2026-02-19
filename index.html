@@ -82,36 +82,36 @@
 }
 
 .results .results-footer{
-  min-height: 44px;           /* évite les variations */
+  min-height: 44px;
   box-sizing: border-box;
 }
 
-.copy-feedback{
-  margin-top: 0;              /* au cas où */
-}
-
-.copy-feedback .fr-icon-check-line{
-  line-height: 1;
-  display: inline-block;
-}
-
-.copy-feedback{
-  display: inline-flex;
+.results .copy-feedback{
+  display: flex;
   align-items: center;
   gap: .35rem;
   line-height: 1;
+  margin: 0;
   opacity: 0;
   transform: translateY(2px);
   transition: opacity .18s ease, transform .18s ease;
 }
-.copy-feedback.is-visible{
+.results .copy-feedback.is-visible{
   opacity: 1;
   transform: translateY(0);
 }
 
-.fr-btn:disabled{
-  opacity: .45;
-  cursor: not-allowed;
+.results .copy-feedback .fr-icon-check-line{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25em;
+  height: 1.25em;
+  line-height: 1;
+}
+.results .copy-feedback .fr-icon-check-line::before{
+  display: block;
+  line-height: 1;
 }
 
 /* Barre boutons */
