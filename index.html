@@ -44,6 +44,39 @@
   border-bottom: 1px solid var(--border-default-grey);
 } */
 
+/* BOUTON COPIER CSS */
+.results {
+  position: relative;
+  padding-bottom: 3.25rem; /* place pour la barre du bas */
+}
+
+.results-footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding-top: .75rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--border-default-grey);
+  background: var(--background-alt-grey);
+}
+
+.copy-feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.copy-feedback.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Barre boutons */
 .genesis-actions {
   display: grid;
@@ -332,18 +365,23 @@
           <div class="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-1w">
             <div class="fr-col">
               <h2 class="fr-h5 fr-m-0">Résultats</h2>
-            </div>
-            <div class="fr-col fr-col--right">
-              <button id="btn-copy-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button">
-                Copier
-              </button>
-            </div>
-          </div>
 
-          <div id="results" class="results fr-text--sm">
-            Aucun résultat pour le moment.
-          </div>
-        </section>
+           <div id="results" class="results fr-text--sm">
+  <div class="results-content">
+    Aucun résultat pour le moment.
+  </div>
+
+  <div class="results-footer">
+    <button id="btn-copy-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button">
+      Copier
+    </button>
+
+    <span id="copy-feedback-results" class="copy-feedback fr-text--xs">
+      <span class="fr-icon-check-line" aria-hidden="true"></span>
+      Copié dans le presse-papiers
+    </span>
+  </div>
+</div>
 
 
 <!-- VUE REQUISITION -->
@@ -422,18 +460,23 @@
           <div class="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-1w">
             <div class="fr-col">
               <h2 class="fr-h5 fr-m-0">Résultats</h2>
-            </div>
-            <div class="fr-col fr-col--right">
-              <button id="btn-copy-req-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button">
-                Copier
-              </button>
-            </div>
-          </div>
-
           <div id="req-results" class="results fr-text--sm">
-            Aucun résultat pour le moment.
-          </div>
-        </section>
+  <div class="results-content">
+    Aucun résultat pour le moment.
+  </div>
+
+  <div class="results-footer">
+    <button id="btn-copy-req-results" class="fr-btn fr-btn--secondary fr-btn--sm" type="button">
+      Copier
+    </button>
+
+    <span id="copy-feedback-req" class="copy-feedback fr-text--xs">
+      <span class="fr-icon-check-line" aria-hidden="true"></span>
+      Copié dans le presse-papiers
+    </span>
+  </div>
+</div>
+
 
 
 <!-- VUE TUTORIEL -->
@@ -1112,7 +1155,7 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
     const wantMail = document.getElementById('chk-mail')?.checked;
     const wantAgent = document.getElementById('chk-agent')?.checked;
 
-    const output = document.getElementById('results');
+    const output = document.querySelector('#results .results-content');
     if (!output) return;
     output.innerHTML = '';
 
@@ -1208,44 +1251,59 @@ if (lines.length === 1 && CP_RE.test(lines[0])) {
   });
 
   // BOUTON COPIER LES RESULTATS
-  function getCleanTextFromResults(el) {
-  if (!el) return '';
-  return (el.innerText || '')
-    .replace(/\u00a0/g, ' ')     
-    .replace(/[ \t]+\n/g, '\n')  
-    .replace(/\n{3,}/g, '\n\n')  
+function getCleanTextFromResults(containerId) {
+  const box = document.getElementById(containerId);
+  if (!box) return '';
+
+  // On copie le texte visible de la zone (y compris les tables), mais pas la barre du bas
+  const content = box.querySelector('.results-content') || box;
+  return (content.innerText || '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 
-async function copyResultsFrom(containerId) {
-  const el = document.getElementById(containerId);
-  const text = getCleanTextFromResults(el);
+function showCopyFeedback(feedbackId) {
+  const el = document.getElementById(feedbackId);
+  if (!el) return;
 
-  if (!text) {
-    alert("Rien à copier pour le moment.");
-    return;
-  }
+  el.classList.add('is-visible');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('is-visible'), 1800);
+}
+
+async function copyFromResults(containerId, feedbackId) {
+  const text = getCleanTextFromResults(containerId);
+  if (!text) return;
 
   try {
     await navigator.clipboard.writeText(text);
+    showCopyFeedback(feedbackId);
   } catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+    // fallback
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showCopyFeedback(feedbackId);
+    } catch (err) {
+      // en dernier recours : rien (ou tu peux afficher un message dans results-content)
+    }
   }
 }
 
 document.getElementById('btn-copy-results')?.addEventListener('click', () => {
-  copyResultsFrom('results');
+  copyFromResults('results', 'copy-feedback-results');
 });
 
 document.getElementById('btn-copy-req-results')?.addEventListener('click', () => {
-  copyResultsFrom('req-results');
+  copyFromResults('req-results', 'copy-feedback-req');
 });
 
   // LISTENER REQUISITIONS
@@ -1258,7 +1316,7 @@ document.getElementById('btn-copy-req-results')?.addEventListener('click', () =>
     const wantPostal = document.getElementById('req-chk-postal')?.checked;
     const wantPhone  = document.getElementById('req-chk-phone')?.checked;
 
-    const output = document.getElementById('req-results');
+    const output = document.querySelector('#req-results .results-content');
     if (!output) return;
     output.innerHTML = '';
 
