@@ -1316,35 +1316,72 @@ function showCopyFeedback(feedbackId) {
 }
 
 async function copyFromResults(containerId, feedbackId) {
-  const text = getCleanTextFromResults(containerId);
-  if (!text) return;
+  const payload = buildStructuredCopy(containerId);
+  if (!payload?.tsv) return;
 
   try {
-    await navigator.clipboard.writeText(text);
+    // ✅ meilleur rendu (tableau) si supporté
+    if (window.ClipboardItem) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/plain': new Blob([payload.tsv], { type: 'text/plain' }),
+          'text/html': new Blob([payload.html], { type: 'text/html' }),
+        })
+      ]);
+    } else {
+      // fallback : TSV (Excel/Calc = tableau)
+      await navigator.clipboard.writeText(payload.tsv);
+    }
     showCopyFeedback(feedbackId);
   } catch (e) {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showCopyFeedback(feedbackId);
-    } catch (err) {
-    }
+    // fallback ultime
+    const ta = document.createElement('textarea');
+    ta.value = payload.tsv;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showCopyFeedback(feedbackId);
   }
 }
 
-document.getElementById('btn-copy-results')?.addEventListener('click', () => {
-  copyFromResults('results', 'copy-feedback-results');
-});
+//MISE EN FORME COPIE
+function buildStructuredCopy(containerId) {
+  const box = document.getElementById(containerId);
+  if (!box) return null;
 
-document.getElementById('btn-copy-req-results')?.addEventListener('click', () => {
-  copyFromResults('req-results', 'copy-feedback-req');
-});
+  const content = box.querySelector('.results-content') || box;
+
+  const table = content.querySelector('table');
+  if (table) {
+    const rows = [...table.querySelectorAll('tr')].map(tr =>
+      [...tr.querySelectorAll('th,td')]
+        .map(td => (td.innerText || '').replace(/\s+/g, ' ').trim())
+        .join('\t')
+    );
+    const tsv = rows.join('\n').trim();
+    const html = table.outerHTML;
+    return { tsv, html };
+  }
+
+  const lines = (content.innerText || '')
+    .replace(/\u00a0/g, ' ')
+    .split('\n')
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  if (!lines.length) return null;
+
+  const tsv = lines.join('\n'); // 1 colonne
+  const html =
+    `<table><tbody>` +
+    lines.map(v => `<tr><td>${escapeHTML(v)}</td></tr>`).join('') +
+    `</tbody></table>`;
+
+  return { tsv, html };
+}
 
 function setCopyButtonState(containerId, btnId) {
   const box = document.getElementById(containerId);
