@@ -1383,6 +1383,176 @@ function buildStructuredCopy(containerId) {
   return { tsv, html };
 }
 
+function extractSectionsFromResults(containerId) {
+  const box = document.getElementById(containerId);
+  if (!box) return [];
+
+  const content = box.querySelector('.results-content') || box;
+
+  // Clone pour manipuler sans casser l'affichage
+  const root = content.cloneNode(true);
+
+  // Remplace <br> par \n pour récupérer des lignes
+  root.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+
+  // 1) Si il y a des tables, on les garde telles quelles en "sections table"
+  const tables = [...root.querySelectorAll('table')];
+
+  // 2) On va aussi récupérer du texte structuré (blocs par <strong>)
+  // Exemple dans tes résultats : "<strong>Adresses IP (3)</strong> ..."
+  const sections = [];
+
+  // Helper: récupère le texte "entre" deux <strong>
+  const strongs = [...root.querySelectorAll('strong')];
+  if (strongs.length) {
+    for (let i = 0; i < strongs.length; i++) {
+      const title = (strongs[i].innerText || '').trim();
+      const startNode = strongs[i];
+      const endNode = strongs[i + 1] || null;
+
+      // récupère tout le texte après le strong jusqu’au prochain strong
+      let text = '';
+      let n = startNode.nextSibling;
+      while (n && n !== endNode) {
+        text += (n.textContent || '');
+        n = n.nextSibling;
+      }
+
+      const lines = text
+        .split('\n')
+        .map(l => l.replace(/\u00a0/g, ' ').trim())
+        .filter(Boolean)
+        .map(l => l.replace(/^•\s*/,'').trim());
+
+      // Ignore section vide
+      if (title && lines.length) {
+        sections.push({ kind: 'lines', title, lines });
+      }
+    }
+  } else {
+    // fallback: tout en lignes
+    const lines = (root.innerText || '')
+      .replace(/\u00a0/g, ' ')
+      .split('\n')
+      .map(l => l.trim())
+      .filter(Boolean);
+    if (lines.length) sections.push({ kind: 'lines', title: 'Résultats', lines });
+  }
+
+  // Ajoute aussi les tables existantes (téléphones/adresses), si présentes
+  for (const t of tables) {
+    sections.push({ kind: 'table', title: 'Table', tableEl: t });
+  }
+
+  return sections;
+}
+
+function tableToTSV(tableEl) {
+  const rows = [...tableEl.querySelectorAll('tr')].map(tr =>
+    [...tr.querySelectorAll('th,td')]
+      .map(td => (td.innerText || '').replace(/\s+/g, ' ').trim())
+      .join('\t')
+  );
+  return rows.join('\n').trim();
+}
+
+function buildProCopyPayload(containerId) {
+  const sections = extractSectionsFromResults(containerId);
+  if (!sections.length) return null;
+
+  // -------- TSV (Excel/Calc)
+  const tsvParts = [];
+
+  // -------- HTML (Word/Outlook)
+  // Inline style minimal (pro) pour que ça rende bien même sans DSFR
+  const htmlRows = [];
+
+  for (const s of sections) {
+    if (s.kind === 'lines') {
+      for (const v of s.lines) {
+        htmlRows.push(
+          `<tr>
+            <td style="padding:6px 8px;border:1px solid #ddd;vertical-align:top;white-space:nowrap;"><strong>${escapeHTML(s.title)}</strong></td>
+            <td style="padding:6px 8px;border:1px solid #ddd;vertical-align:top;">${escapeHTML(v)}</td>
+            <td style="padding:6px 8px;border:1px solid #ddd;vertical-align:top;"></td>
+          </tr>`
+        );
+        tsvParts.push(`${s.title}\t${v}\t`);
+      }
+      tsvParts.push(''); // ligne vide entre sections
+    }
+
+    if (s.kind === 'table') {
+      // On ajoute la table en "bloc" (HTML) + TSV
+      const tsv = tableToTSV(s.tableEl);
+      if (tsv) {
+        tsvParts.push('[TABLE]');
+        tsvParts.push(tsv);
+        tsvParts.push('');
+      }
+
+      htmlRows.push(
+        `<tr>
+          <td colspan="3" style="padding:10px 8px;border:1px solid #ddd;background:#f6f6f6;">
+            ${s.tableEl.outerHTML}
+          </td>
+        </tr>`
+      );
+    }
+  }
+
+  const tsv = tsvParts.join('\n').trim();
+
+  const html =
+    `<table style="border-collapse:collapse;font-family:Arial, sans-serif;font-size:11pt;width:100%;">
+      <caption style="caption-side:top;text-align:left;font-weight:bold;margin-bottom:8px;">
+        Résultats GENESIS
+      </caption>
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:6px 8px;border:1px solid #ddd;background:#f2f2f2;">Type</th>
+          <th style="text-align:left;padding:6px 8px;border:1px solid #ddd;background:#f2f2f2;">Valeur</th>
+          <th style="text-align:left;padding:6px 8px;border:1px solid #ddd;background:#f2f2f2;">Détails</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${htmlRows.join('')}
+      </tbody>
+    </table>`;
+
+  return { tsv, html };
+}
+
+async function copyProFromResults(containerId, feedbackId) {
+  const payload = buildProCopyPayload(containerId);
+  if (!payload?.tsv) return;
+
+  try {
+    if (window.ClipboardItem) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/plain': new Blob([payload.tsv], { type: 'text/plain' }),
+          'text/html':  new Blob([payload.html], { type: 'text/html'  }),
+        })
+      ]);
+    } else {
+      await navigator.clipboard.writeText(payload.tsv);
+    }
+    showCopyFeedback(feedbackId);
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = payload.tsv;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showCopyFeedback(feedbackId);
+  }
+}
+
+
 function setCopyButtonState(containerId, btnId) {
   const box = document.getElementById(containerId);
   const btn = document.getElementById(btnId);
