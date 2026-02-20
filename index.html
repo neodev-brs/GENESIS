@@ -1565,11 +1565,6 @@ function setCopyButtonState(containerId, btnId) {
   btn.disabled = !hasResults;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  setCopyButtonState('results', 'btn-copy-results');
-  setCopyButtonState('req-results', 'btn-copy-req-results');
-});
-
 function setCopyEnabled(boxId, btnId) {
   const box = document.getElementById(boxId);
   const btn = document.getElementById(btnId);
@@ -1777,6 +1772,14 @@ headerHome?.addEventListener('click', (e) => {
   btnBackHome?.addEventListener('click', () => showView(viewHome));
   btnBackHomeFromReq?.addEventListener('click', () => showView(viewHome));
 
+  // LISTENERS BOUTONS COPIER
+  document.getElementById('btn-copy-results')?.addEventListener('click', () => {
+    copyProFromResults('results', 'copy-feedback-results');
+  });
+
+document.getElementById('btn-copy-req-results')?.addEventListener('click', () => {
+  copyProFromResults('req-results', 'copy-feedback-req');
+});
 </script>
 
 <footer class="genesis-credit">
